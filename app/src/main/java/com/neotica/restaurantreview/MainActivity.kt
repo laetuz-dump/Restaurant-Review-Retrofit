@@ -1,9 +1,12 @@
 package com.neotica.restaurantreview
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -43,6 +46,19 @@ class MainActivity : AppCompatActivity() {
         val itemDivider = DividerItemDecoration(this, layoutManager.orientation)
         //Step 21.4 Bind the item divider to recview
         binding.rvReview.addItemDecoration(itemDivider)
+
+        //Step 28 Create btn onclick listener
+        binding.apply {
+            btnSend.setOnClickListener {
+                //Step 29 Call post method
+                    view ->
+                postReview(edReview.text.toString())
+                //Step 29.1 Hide keyboard
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(view.windowToken,0)
+            }
+        }
+
     }
 
     //Step 23: Setup showLoading function containing progressbar visibility
@@ -110,13 +126,42 @@ class MainActivity : AppCompatActivity() {
                     Log.e(TAG, "onFailure: ${response.message()}")
                 }
             }
-
             override fun onFailure(call: Call<RestaurantResponse>, t: Throwable) {
                 showLoading(false)
                 Log.e(TAG,"onFailure: ${t.message}")
             }
+        })
+    }
 
+    //Step 26: Setup Post method in Activity
+    private fun postReview(review: String){
+        showLoading(true)
+        //Step 26.1 Implement POST method from ApiConfig
+        val client = ApiConfig.getApiService().postReview(ID, "martinn", review)
+        //Step 26.2 Set enqueue for the POST method
+        client.enqueue(object : Callback<Restaurant>{
+            //Step 27 Implement members (onResponse, onFailure)
+            override fun onResponse(
+                call: Call<Restaurant>,
+                response: Response<Restaurant>
+            ) {
+                showLoading(false)
+                //Step 27.1 Define the body of response
+                val responseBody = response.body()
+                //Step 27.2 Call setReviewData if response isSuccessful & body response is not null.
+                if (response.isSuccessful && responseBody != null){
+                    setReviewData(responseBody.customerReviews)
+                } else {
+                    //Step 27.3 Setup exception
+                    Log.e(TAG, "onFailure: ${response.message()}")
+                }
+            }
 
+            override fun onFailure(call: Call<Restaurant>, t: Throwable) {
+                showLoading(false)
+                //Step 27.3 Setup exception
+                Log.e(TAG, "onFailure: ${t.message}")
+            }
         })
     }
 }
