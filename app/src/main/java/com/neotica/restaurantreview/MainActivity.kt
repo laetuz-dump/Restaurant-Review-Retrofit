@@ -133,33 +133,33 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    //Step 26: Setup Post method in Activity
+    //Step 35: Setup Post method in Activity
     private fun postReview(review: String){
         showLoading(true)
-        //Step 26.1 Implement POST method from ApiConfig
+        //Step 35.1 Implement POST method from ApiConfig
         val client = ApiConfig.getApiService().postReview(ID, "martinn", review)
-        //Step 26.2 Set enqueue for the POST method
+        //Step 35.2 Set enqueue for the POST method
         client.enqueue(object : Callback<Restaurant>{
-            //Step 27 Implement members (onResponse, onFailure)
+            //Step 36 Implement members (onResponse, onFailure)
             override fun onResponse(
                 call: Call<Restaurant>,
                 response: Response<Restaurant>
             ) {
                 showLoading(false)
-                //Step 27.1 Define the body of response
+                //Step 36.1 Define the body of response
                 val responseBody = response.body()
-                //Step 27.2 Call setReviewData if response isSuccessful & body response is not null.
+                //Step 36.2 Call setReviewData if response isSuccessful & body response is not null.
                 if (response.isSuccessful && responseBody != null){
                     setReviewData(responseBody.customerReviews)
                 } else {
-                    //Step 27.3 Setup exception
+                    //Step 36.3 Setup exception
                     Log.e(TAG, "onFailure: ${response.message()}")
                 }
             }
 
             override fun onFailure(call: Call<Restaurant>, t: Throwable) {
                 showLoading(false)
-                //Step 27.3 Setup exception
+                //Step 36.3 Set log for exception
                 Log.e(TAG, "onFailure: ${t.message}")
             }
         })
